@@ -14,8 +14,8 @@ client.connect();
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 
-app.get('/users', (req, res)=>{
-    client.query(`Select * from users`, (err, result)=>{
+app.get('/judges', (req, res)=>{
+    client.query(`Select * from judges`, (err, result)=>{
         if(!err){
             res.send(result.rows);
         }
@@ -24,8 +24,8 @@ app.get('/users', (req, res)=>{
 })
 client.connect();
 
-app.get('/users/:id', (req, res)=>{
-    client.query(`Select * from users where id=${req.params.id}`, (err, result)=>{
+app.get('/judges/:id', (req, res)=>{
+    client.query(`Select * from judges where id=${req.params.id}`, (err, result)=>{
         if(!err){
             res.send(result.rows);
         }
@@ -34,10 +34,10 @@ app.get('/users/:id', (req, res)=>{
 })
 client.connect();
 
-app.post('/users', (req, res)=> {
-    const user = req.body;
-    let insertQuery = `insert into users(id, firstname, lastname, location) 
-                       values(${user.id}, '${user.firstname}', '${user.lastname}', '${user.location}')`
+app.post('/judges', (req, res)=> {
+    const judge = req.body;
+    let insertQuery = `insert into judges(id, name, address) 
+                       values(${judge.id}, '${judge.name}', '${judge.address}')`
 
     client.query(insertQuery, (err, result)=>{
         if(!err){
@@ -48,13 +48,12 @@ app.post('/users', (req, res)=> {
     client.end;
 })
 
-app.put('/users/:id', (req, res)=> {
-    let user = req.body;
-    let updateQuery = `update users
-                       set firstname = '${user.firstname}',
-                       lastname = '${user.lastname}',
-                       location = '${user.location}'
-                       where id = ${user.id}`
+app.put('/judges/:id', (req, res)=> {
+    let judge = req.body;
+    let updateQuery = `update judges
+                       set name = '${judge.name}',
+                       location = '${judge.address}'
+                       where id = ${judge.id}`
 
     client.query(updateQuery, (err, result)=>{
         if(!err){
@@ -65,8 +64,8 @@ app.put('/users/:id', (req, res)=> {
     client.end;
 })
 
-app.delete('/users/:id', (req, res)=> {
-    let insertQuery = `delete from users where id=${req.params.id}`
+app.delete('/judges/:id', (req, res)=> {
+    let insertQuery = `delete from judges where id=${req.params.id}`
 
     client.query(insertQuery, (err, result)=>{
         if(!err){
