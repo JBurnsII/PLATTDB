@@ -26,8 +26,8 @@ app.get('/judges', (req, res)=>{
 })
 client.connect();
 
-app.get('/judges/:id', (req, res)=>{
-    client.query(`Select * from judges where id=${req.params.id}`, (err, result)=>{
+app.get('/judges/:judges_ID', (req, res)=>{
+    client.query(`Select * from judges where judges_ID=${req.params.judges_ID}`, (err, result)=>{
         if(!err){
             res.send(result.rows);
         }
@@ -38,8 +38,8 @@ client.connect();
 
 app.post('/judges', (req, res)=> {
     const judge = req.body;
-    let insertQuery = `insert into judges(id, name, address) 
-                       values(${judge.id}, '${judge.name}', '${judge.address}')`
+    let insertQuery = `insert into judges(judges_ID, name, address) 
+                       values(${judge.judges_ID}, '${judge.name}', '${judge.address}')`
 
     client.query(insertQuery, (err, result)=>{
         if(!err){
@@ -50,12 +50,12 @@ app.post('/judges', (req, res)=> {
     client.end;
 })
 
-app.put('/judges/:id', (req, res)=> {
+app.put('/judges/:judges_ID', (req, res)=> {
     let judge = req.body;
     let updateQuery = `update judges
                        set name = '${judge.name}',
                        location = '${judge.address}'
-                       where id = ${judge.id}`
+                       where id = ${judge.judges_ID}`
 
     client.query(updateQuery, (err, result)=>{
         if(!err){
@@ -67,7 +67,7 @@ app.put('/judges/:id', (req, res)=> {
 })
 
 app.delete('/judges/:id', (req, res)=> {
-    let insertQuery = `delete from judges where id=${req.params.id}`
+    let insertQuery = `delete from judges where id=${req.params.judges_ID}`
 
     client.query(insertQuery, (err, result)=>{
         if(!err){
