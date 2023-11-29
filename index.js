@@ -1,20 +1,27 @@
-//npm install pg --save
+const client = require('./connection')
+const express = require('express')
+const bodyParser = require('body-parser')
+const app = express()
+const port = 3000
 
-const client = require('./connection.js')
-const express = require('express');
-const app = express();
 
-app.listen(3300, ()=>{
-    console.log("Sever is now listening at port 3000");
+
+app.listen(port, () => {
+    console.log(`App running on port ${port}.`)
 })
 
 client.connect();
 
-//npm install express --save
-//npm install body-parser --save
+app.use(bodyParser.json())
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+  })
+)
 
-const bodyParser = require("body-parser");
-app.use(bodyParser.json());
+app.get('/', (request, response) => {
+    response.json({ info: 'Node.js, Express, and Postgres API' })
+})
 
 app.get('/judges', (req, res)=>{
     client.query(`Select * from judges`, (err, result)=>{
@@ -22,9 +29,7 @@ app.get('/judges', (req, res)=>{
             res.send(result.rows);
         }
     });
-    client.end;
 })
-client.connect();
 
 app.get('/judges/:judges_ID', (req, res)=>{
     client.query(`Select * from judges where judges_ID=${req.params.judges_ID}`, (err, result)=>{
@@ -32,9 +37,7 @@ app.get('/judges/:judges_ID', (req, res)=>{
             res.send(result.rows);
         }
     });
-    client.end;
 })
-client.connect();
 
 app.post('/judges', (req, res)=> {
     const judge = req.body;
@@ -47,15 +50,14 @@ app.post('/judges', (req, res)=> {
         }
         else{ console.log(err.message) }
     })
-    client.end;
 })
 
 app.put('/judges/:judges_ID', (req, res)=> {
     let judge = req.body;
     let updateQuery = `update judges
                        set name = '${judge.name}',
-                       location = '${judge.address}'
-                       where id = ${judge.judges_ID}`
+                       address = '${judge.address}'
+                       where judges_ID = ${judge.judges_ID}`
 
     client.query(updateQuery, (err, result)=>{
         if(!err){
@@ -63,11 +65,10 @@ app.put('/judges/:judges_ID', (req, res)=> {
         }
         else{ console.log(err.message) }
     })
-    client.end;
 })
 
-app.delete('/judges/:id', (req, res)=> {
-    let insertQuery = `delete from judges where id=${req.params.judges_ID}`
+app.delete('/judges/:judges_ID', (req, res)=> {
+    let insertQuery = `delete from judges where judges_ID=${req.params.judges_ID}`
 
     client.query(insertQuery, (err, result)=>{
         if(!err){
@@ -75,5 +76,6 @@ app.delete('/judges/:id', (req, res)=> {
         }
         else{ console.log(err.message) }
     })
-    client.end;
 })
+
+client.end();
