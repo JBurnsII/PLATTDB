@@ -11,6 +11,7 @@ app.listen(port, () => {
 })
 
 client.connect();
+console.log(client);
 
 app.use(bodyParser.json())
 app.use(
