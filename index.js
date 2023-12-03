@@ -11,17 +11,13 @@ app.listen(port, () => {
 })
 
 client.connect();
-console.log(client);
+//console.log(client);
 
 app.use(bodyParser.json())
-app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  })
-)
+app.use(bodyParser.urlencoded({extended: true,}))
 
-app.get('/', (request, response) => {
-    response.json({ info: 'Node.js, Express, and Postgres API' })
+app.get('/', (req, res) => {
+    res.json({ info: 'Node.js, Express, and Postgres API' })
 })
 
 app.get('/judges', (req, res)=>{
@@ -31,52 +27,66 @@ app.get('/judges', (req, res)=>{
         }
     });
 })
-
-app.get('/judges/:judges_ID', (req, res)=>{
-    client.query(`Select * from judges where judges_ID=${req.params.judges_ID}`, (err, result)=>{
+app.get('/judges/:id', (req, res)=>{
+    client.query(`Select * from judges where judges_ID=${req.params.id}`, (err, result)=>{
         if(!err){
             res.send(result.rows);
         }
     });
 })
-
-app.post('/judges', (req, res)=> {
-    const judge = req.body;
-    let insertQuery = `insert into judges(judges_ID, name, address) 
-                       values(${judge.judges_ID}, '${judge.name}', '${judge.address}')`
-
-    client.query(insertQuery, (err, result)=>{
+app.get('/judges/:id/sits', (req, res)=>{
+    const {id} = req.params;
+    client.query(`Select * from sits where judges=${id}`, (err, result)=>{
         if(!err){
-            res.send('Insertion was successful')
+            res.send(result.rows);
         }
-        else{ console.log(err.message) }
-    })
+    });
 })
-
-app.put('/judges/:judges_ID', (req, res)=> {
-    let judge = req.body;
-    let updateQuery = `update judges
-                       set name = '${judge.name}',
-                       address = '${judge.address}'
-                       where judges_ID = ${judge.judges_ID}`
-
-    client.query(updateQuery, (err, result)=>{
+app.get('/judges/:id/sits/court', (req, res)=>{
+    const {id} = req.params;
+    client.query(`Select * from court where court_ID=(Select courts from sits where judges=${id})`, (err, result)=>{
         if(!err){
-            res.send('Update was successful')
+            res.send(result.rows);
         }
-        else{ console.log(err.message) }
-    })
+    });
 })
+// app.post('/judges', (req, res)=> {
+//     const judge = req.body;
+//     let insertQuery = `insert into judges(judges_ID, name, address) 
+//                        values(${judge.judges_ID}, '${judge.name}', '${judge.address}')`
 
-app.delete('/judges/:judges_ID', (req, res)=> {
-    let insertQuery = `delete from judges where judges_ID=${req.params.judges_ID}`
+//     client.query(insertQuery, (err, result)=>{
+//         if(!err){
+//             res.send('Insertion was successful')
+//         }
+//         else{ console.log(err.message) }
+//     })
+// })
 
-    client.query(insertQuery, (err, result)=>{
-        if(!err){
-            res.send('Deletion was successful')
-        }
-        else{ console.log(err.message) }
-    })
-})
+// app.put('/judges/:judges_ID', (req, res)=> {
+//     let judge = req.body;
+//     let updateQuery = `update judges
+//                        set name = '${judge.name}',
+//                        address = '${judge.address}'
+//                        where judges_ID = ${judge.judges_ID}`
+
+//     client.query(updateQuery, (err, result)=>{
+//         if(!err){
+//             res.send('Update was successful')
+//         }
+//         else{ console.log(err.message) }
+//     })
+// })
+
+// app.delete('/judges/:judges_ID', (req, res)=> {
+//     let insertQuery = `delete from judges where judges_ID=${req.params.judges_ID}`
+
+//     client.query(insertQuery, (err, result)=>{
+//         if(!err){
+//             res.send('Deletion was successful')
+//         }
+//         else{ console.log(err.message) }
+//     })
+// })
 
 client.end();
