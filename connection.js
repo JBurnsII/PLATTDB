@@ -78,25 +78,39 @@ async function selectCountParty(data, name, type, partya, partyb) {
 async function selectJudge(judge) {
     try {
       const res = await client.query(
-        `SELECT js.name FROM judges js where js.name like '${judge}' ` 
+        `SELECT js.name FROM judges js where js.name like '%${judge}%' ` 
       );
       return res.rows;
     } catch (err) {
       return err.stack;
     }
-}  
+} 
+async function selectCase(case_type) {
+    try {
+      const res = await client.query(
+        `SELECT Distinct cs.type FROM cases cs Where cs.type like '%${case_type}%'` 
+      );
+      return res.rows;
+    } catch (err) {
+      return err.stack;
+    }
+} 
 async function advanced_Function (judge, case_type) {
     var result1 = await selectCountParty('Count(*)',judge, case_type, 'cs.party1_id', 'cs.party2_id');
     var result2 = await selectCountParty('Count(*)',judge, case_type, 'cs.party2_id', 'cs.party1_id');
     var judge_search = await selectJudge(judge);
+    var case_search = await selectCase(case_type);
+    console.log(" ")
     console.log('Given the judge search: %s', judge);
     console.log('Judges found in search:');
     console.log(judge_search);
-    console.log('Given the case type search: %s', case_type)
-    console.log('Chance that Partitioner wins: %s', result1);
+    console.log('Given the case type search: %s', case_type);
+    console.log('Case types found in search:');
+    console.log(case_search)
+    console.log('Chance that Partitioner wins:');
     console.log(result1);
     console.log('Chance that Respondent wins:')
     console.log(result2);
 }
 
-advanced_Function('Andrea Stroh Thompson', `Petition for Review under`); //change these imputs in order to search up different percent chances for outcomes.
+advanced_Function('Andrea', `Petition for Review under`); //change these imputs in order to search up different percent chances for outcomes.
