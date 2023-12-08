@@ -16,28 +16,12 @@ client.connect(function(err) {
     console.log("connected")
 });
 
-console.log("before query")
-
-client.query("SELECT * FROM judges Where judges_id = 500", function (err, result, fields) {
-    if (err) throw err;
-    console.log(result.rows);
-});
-
-// module.exports = client
-
-
-
-//having trouble exporting client this is index.js
-//const client = require('./connection')
 const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
 const port = 3000
 
 app.listen(port, () => {console.log(`App running on port ${port}.`)})
-
-//client.connect();
-//console.log(client);
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true,}))
@@ -78,4 +62,55 @@ app.get('/judges/:id/sits/court', (req, res)=>{
     });
 })
 
-//party routes
+//advanced functionality
+
+async function selectCountParty(data, name, type, partya, partyb) {
+    try {
+      const res = await client.query(
+        `SELECT (SELECT ${data}::decimal FROM judges js inner join cases cs on js.judges_id = cs.judge_id and js.name like '%${name}%' and cs.type like '%${type}%' and cs.decision = ${partya}) / ((SELECT ${data}::decimal FROM judges js inner join cases cs on js.judges_id = cs.judge_id and js.name like '%${name}%' and cs.type like '%${type}%' and cs.decision = ${partya}) + (SELECT ${data}::decimal FROM judges js inner join cases cs on js.judges_id = cs.judge_id and js.name like '%${name}%' and cs.type like '%${type}%' and cs.decision = ${partyb})) as percent_chance` 
+      );
+      return res.rows;//[0][0];
+    } catch (err) {
+      return err.stack;
+    }
+} 
+
+async function selectJudge(judge) {
+    try {
+      const res = await client.query(
+        `SELECT js.name FROM judges js where js.name like '%${judge}%' ` 
+      );
+      return res.rows;
+    } catch (err) {
+      return err.stack;
+    }
+} 
+async function selectCase(case_type) {
+    try {
+      const res = await client.query(
+        `SELECT Distinct cs.type FROM cases cs Where cs.type like '%${case_type}%'` 
+      );
+      return res.rows;
+    } catch (err) {
+      return err.stack;
+    }
+} 
+async function advanced_Function (judge, case_type) {
+    var result1 = await selectCountParty('Count(*)',judge, case_type, 'cs.party1_id', 'cs.party2_id');
+    var result2 = await selectCountParty('Count(*)',judge, case_type, 'cs.party2_id', 'cs.party1_id');
+    var judge_search = await selectJudge(judge);
+    var case_search = await selectCase(case_type);
+    console.log(" ")
+    console.log('Given the judge search: %s', judge);
+    console.log('Judges found in search:');
+    console.log(judge_search);
+    console.log('Given the case type search: %s', case_type);
+    console.log('Case types found in search:');
+    console.log(case_search)
+    console.log('Chance that Partitioner wins:');
+    console.log(result1);
+    console.log('Chance that Respondent wins:')
+    console.log(result2);
+}
+
+advanced_Function('Andrea', `Petition for Review under`); //change these inputs for judge name and case type in order to search up different percent chances for outcomes.
