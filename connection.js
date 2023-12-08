@@ -113,4 +113,4 @@ async function advanced_Function (judge, case_type) {
     console.log(result2);
 }
 
-advanced_Function('Andrea', `Petition for Review under`); //change these imputs in order to search up different percent chances for outcomes.
+advanced_Function('Andrea', `Petition for Review under`); //change these inputs for judge name and case type in order to search up different percent chances for outcomes.
